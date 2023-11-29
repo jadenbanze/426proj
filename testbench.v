@@ -2,12 +2,12 @@
 
 module TemporalThermalCovertChannel_tb;
 
-    // Inputs
+    // Inputs to the UUT
     reg clk;
     reg reset;
     reg enable;
 
-    // Outputs
+    // Outputs from the UUT
     wire [19:0] counter_output;
     wire [7:0] leds;
 
@@ -21,7 +21,7 @@ module TemporalThermalCovertChannel_tb;
     );
 
     // Clock generation
-    always #10 clk = ~clk; // 50MHz clock
+    always #10 clk = ~clk; // Generate a clock with a period of 20ns (50 MHz)
 
     initial begin
         // Initialize Inputs
@@ -29,30 +29,32 @@ module TemporalThermalCovertChannel_tb;
         reset = 1;
         enable = 0;
 
-        // Wait for global reset
+        // Apply a reset
         #100;
         reset = 0;
 
-        // Enable the counter and observe the LEDs and counter output
-        #20 enable = 1;
+        // Enable the module after some time
+        #50; 
+        enable = 1;
         
-        // Observe the output for some time
+        // Run the simulation for some time to observe the behavior
         #1000;
 
-        // Disable and check outputs
+        // Disable the module to check the behavior
         enable = 0;
         #100;
 
-        // Reset the system and observe
+        // Apply a reset again
         reset = 1;
-        #100;
+        #50;
         reset = 0;
 
-        // Enable again to check if system resumes correctly
-        #20 enable = 1;
+        // Enable the module once more
+        #50; 
+        enable = 1;
         #1000;
 
-        // Finish the simulation
+        // End of the simulation
         $finish;
     end
       
