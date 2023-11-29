@@ -8,29 +8,37 @@ module TemporalThermalCovertChannel (
 
     reg [74:0] ring_oscillator;
     reg [19:0] counter;
+    reg last_ring_bit; // Intermediate signal for ring_oscillator[74]
     reg [31:0] display_timer; // 32-bit timer to manage display intervals
 
     // The Ring Oscillator with 75 Inverters
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             ring_oscillator <= 75'b0;
-        end else if (enable & ring_oscillator[74]) begin
+            last_ring_bit <= 0;
+        end else if (enable) begin
             ring_oscillator <= ~ring_oscillator;
+            last_ring_bit <= ring_oscillator[74];
         end
     end
-
-    (* keep = "true" *) reg [74:0] ro_keep = ring_oscillator;
 
     // 20-bit Counter
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             counter <= 20'b0;
-        end else if (enable & ring_oscillator[74]) begin
+        end else if (enable & last_ring_bit) begin
             counter <= counter + 1'b1;
         end
     end
 
-    assign counter_output = counter;
+    // Update counter_output
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            counter_output <= 20'b0;
+        end else if (enable & last_ring_bit) begin
+            counter_output <= counter;
+        end
+    end
 
     // Display Timer Logic
     always @(posedge clk or posedge reset) begin
